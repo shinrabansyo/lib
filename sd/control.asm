@@ -1,7 +1,6 @@
 ===
 
-// uint8_t spi_sd_command(uint8_t cmd, uint32_t arg, uint8_t crc)
-
+// uint8_t func_sd_init(uint8_t cs, uint8_t clk_shamt)
 @func_sd_init
     // プロローグ
     // フレームポインタの退避
@@ -15,6 +14,31 @@
 
     //////////////////////////////////////////////////////////////
     
+    // GPIO: io空間の0x04番地 32bit の値が入る
+    // 0bit: GPIO0
+    // 31: GPIO31
+    
+    // Gpio:Init
+    subi r4 = r10, 1
+    addi r5 = r0, 1
+    srl r4 = r5, r4
+    xori r5 = r4, 0xFFFFFFFF
+    in r6 = r0[4]
+    and r7 = r5, r6
+    out r0[4] = r7                  // CS = 引数
+
+    // Spi:Mode
+    addi r4 = r0, 0
+    out r0[2] = r4                  // Mode = 0
+
+    // Spi:Clockshamt
+    add r4 = r0, r11
+    out r0[3] = r4                  // Clockshamt = 4
+    // spiモードの初期化
+    // チップセレクト
+
+    //////////////////////////////////////////////////////////////
+
     // CMD0
     // arg: 0x00000000
     addi r10 = r0, 0x00 // cmd0
