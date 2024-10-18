@@ -18,12 +18,12 @@
 @func_spi_sd_command
 
     // フレームポインタの退避
-    add r2 = r2, -4
+    subi r2 = r2, 4
     sw r2[0] = r3
     addi r3 = r2, 0
 
     // リターンアドレスの退避
-    addi r2 = r2, -4
+    subi r2 = r2, 4
     sw r3[-4] = r1
  
 
@@ -79,12 +79,12 @@
 
 @func_polling_r1_response
     // フレームポインタの退避
-    add r2 = r2, -4
+    subi r2 = r2, 4
     sw r2[0] = r3
     addi r3 = r2, 0
 
     // リターンアドレスの退避
-    addi r2 = r2, -4
+    subi r2 = r2, 4
     sw r3[-4] = r1
 
 
@@ -114,12 +114,12 @@
 
 @func_polling_r3_r7_response
     // フレームポインタの退避
-    add r2 = r2, -4
+    subi r2 = r2, 4
     sw r2[0] = r3
     addi r3 = r2, 0
 
     // リターンアドレスの退避
-    addi r2 = r2, -12
+    subi r2 = r2, 12
     sw r3[-4] = r1
     sw r3[-8] = r20
     sw r3[-12] = r21
@@ -144,21 +144,27 @@
 
     addi r10 = r0, 0xFF
     beq r1, (r0, r0) -> @func_spi_transfer
-    slli r21 = r21, 8
-    and r10 = r10, 0xFF
-    or r21 = r21, r10
+    add r4 = r0, r21
+    slli r4 = r4, 8
+    add r5 = r0, r10
+    andi r10 = r5, 0xFF
+    or r21 = r4, r10
 
     addi r10 = r0, 0xFF
     beq r1, (r0, r0) -> @func_spi_transfer
-    slli r21 = r21, 8
-    and r10 = r10, 0xFF
-    or r21 = r21, r10
+    add r4 = r0, r21
+    slli r4 = r4, 8
+    add r5 = r0, r10
+    andi r10 = r5, 0xFF
+    or r21 = r4, r10
 
     addi r10 = r0, 0xFF
     beq r1, (r0, r0) -> @func_spi_transfer
-    slli r21 = r21, 8
-    and r10 = r10, 0xFF
-    or r21 = r21, r10
+    add r4 = r0, r21
+    slli r4 = r4, 8
+    add r5 = r0, r10
+    andi r10 = r5, 0xFF
+    or r21 = r4, r10
 
     // r20: r1 resp.
     // r21: r7 resp.(4byte)

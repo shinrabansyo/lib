@@ -4,12 +4,12 @@
 @func_sd_init
     // プロローグ
     // フレームポインタの退避
-    add r2 = r2, -4
+    subi r2 = r2, 4
     sw r2[0] = r3
     addi r3 = r2, 0
 
     // リターンアドレスの退避
-    addi r2 = r2, -4
+    subi r2 = r2, 4
     sw r3[-4] = r1
 
     //////////////////////////////////////////////////////////////
@@ -19,7 +19,8 @@
     // 31: GPIO31
     
     // Gpio:Init
-    subi r4 = r10, 1
+    add r4 = r0, r10
+    subi r4 = r4, 1
     addi r5 = r0, 1
     srl r4 = r5, r4
     xori r5 = r4, 0xFFFFFFFF
@@ -48,7 +49,8 @@
     // R1 resp が 0x01 であることを確認、それまでpolling
     beq r1, (r0, r0) -> @func_polling_r1_response
     addi r4 = r0, 0x01
-    andi r10 = r10, 0xFF // 下位8bitをマスク
+    add r5 = r0, r10
+    andi r10 = r5, 0xFF // 下位8bitをマスク
     beq r0, (r10, r4) -> @cmd8.func_sd_init
 
     // 失敗ならエラーコード1
@@ -69,7 +71,8 @@
     // R7 resp の下位12bit が 0x1aa であることを確認
     beq r1, (r0, r0) -> @func_polling_r3_r7_response
     addi r4 = r0, 0x1aa
-    andi r10 = r10, 0xFFF // 下位12bitをマスク
+    add r5 = r0, 10
+    andi r10 = r5, 0xFFF // 下位12bitをマスク
     beq r0, (r10, r4) -> @acmd41.func_sd_init
 
     // 失敗ならエラーコード2
@@ -93,7 +96,8 @@
     // cmd55 の R1 レスポンス
     beq r1, (r0, r0) -> @func_polling_r1_response
     addi r4 = r0, 0x01                                  // REVIEW: 00かもしれねぇぞ
-    andi r10 = r10, 0xFF // 下位8bitをマスク
+    add r5 = r0, r10
+    andi r10 = r5, 0xFF // 下位8bitをマスク
     beq r0, (r10, r4) -> @cmd41.func_sd_init
 
     // 失敗ならエラーコード3
@@ -112,12 +116,14 @@
 
     // if (R1 resp) == 0x01 : もう一度 ACMD41 を送信 (0x01 なら初期化中)
     addi r4 = r0, 0x01
-    andi r10 = r10, 0xFF // 下位8bitをマスク
+    add r5 = r0, r10
+    andi r10 = r5, 0xFF // 下位8bitをマスク
     beq r0, (r10, r4) -> @acmd41.func_sd_init
 
     // if (R1 resp) == 0x00 : 次に進む (0x00 は「初期化完了合図」)
     addi r4 = r0, 0x00
-    andi r10 = r10, 0xFF // 下位8bitをマスク
+    add r5 = r0, r10
+    andi r10 = r5, 0xFF // 下位8bitをマスク
     beq r0, (r10, r4) -> @cmd58.func_sd_init
 
     // 失敗ならエラーコード4
@@ -136,7 +142,8 @@
     
     // R3 resp の 30bit 目が 1 であることを確認（SDHC/SDXC）
     addi r4 = r0, 0x40000000
-    andi r10 = r10, 0x40000000 // 30bit目をマスク
+    add r5 = r0, r10
+    andi r10 = r5, 0xFF // 下位8bitをマスク
     beq r0, (r10, r4) -> @success.func_sd_init
 
     // 失敗ならエラーコード6
