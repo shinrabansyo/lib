@@ -9,9 +9,17 @@
     addi r3 = r2, 0
 
     // リターンアドレスの退避
-    subi r2 = r2, 4
+    subi r2 = r2, 16
     sw r3[-4] = r1
+    sw r3[-8] = r20
+    sw r3[-12] = r21
+    sw r3[-16] = r22
 
+    //////////////////////////////////////////////////////////////
+    
+    // 引数の保存
+    add r20 = r0, r10   // cs
+    add r21 = r0, r11   // clk_shamt
 
     //////////////////////////////////////////////////////////////
     
@@ -20,14 +28,9 @@
     // 31: GPIO31
     
     // Gpio:Init
-    add r4 = r0, r10
-    subi r4 = r4, 1
-    addi r5 = r0, 1
-    srl r4 = r5, r4
-    xori r5 = r4, 0xFFFFFFFF
-    in r6 = r0[4]
-    and r7 = r5, r6
-    out r0[4] = r7                  // CS = 引数
+    add r10 = r0, r21
+    addi r11 = r0, 1
+    beq r1, (r0, r0) -> @func_gpio_write
 
     // Spi:Mode
     addi r4 = r0, 0
@@ -41,15 +44,31 @@
 
     //////////////////////////////////////////////////////////////
 
-    // TODO: 1. 1ms待機
-    // 起動からのクロック数 / クロック周波数 = 起動からの秒数
-    in r4 = r0[0x1000]
-    in r5 = r0[0x1001]
-    in r6 = r0[0x1002]
+    // 1. 1ms待機
+    addi r10 = r0, 0x01
+    beq r1, (r0, r0) -> @func_wait_ms
 
-    // TODO: 2. CS = DI = High
-    // TODO: 3. 74クロック以上待機
-    // TODO: 4. CS = Low
+    // 2. CS = High
+    add r10 = r0, r20
+    addi r11 = r0, 1
+    beq r1, (r0, r0) -> @func_gpio_write
+
+    // 3. DI = High & 74 クロック待機
+    addi r4 = r0, 0
+    @dummy_clk_loop.func_sd_init
+        beq r0, (r4, 10) -> @dummy_clk_loop_end.func_sd_init
+        addi r4 = r4, 1
+
+        add r22 = r0, r4
+        addi r10 = r0, 0xff
+        beq r1, (r0, r0) -> @func_spi_transfer
+        add r4 = r0, r22
+    @dummy_clk_loop_end.func_sd_init
+
+    // 4. CS = Low
+    add r10 = r0, r20
+    addi r11 = r0, 0
+    beq r1, (r0, r0) -> @func_gpio_write
 
     //////////////////////////////////////////////////////////////
 
@@ -176,7 +195,10 @@
     @epilogue.func_sd_init
     // 保存レジスタの復元
     lw r1 = r3[-4]
-    addi r2 = r2, 4
+    lw r20 = r3[-8]
+    lw r21 = r3[-12]
+    lw r22 = r3[-16]
+    addi r2 = r2, 16
 
     // フレームポインタの復元
     lw r3 = r3[0]
