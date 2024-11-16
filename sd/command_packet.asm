@@ -188,3 +188,35 @@
 
     // return
     jal r0, r1[0]
+
+@func_polling_data_token_for_cmd17_18_24
+    // フレームポインタの退避
+    subi r2 = r2, 4
+    sw r2[0] = r3
+    addi r3 = r2, 0
+
+    // リターンアドレスの退避
+    subi r2 = r2, 4
+    sw r3[-4] = r1
+
+    @loop.func_polling_data_token_for_cmd17_18_24
+        // spi_transfer
+        addi r10 = r0, 0xFF
+        beq r1, (r0, r0) -> @func_spi_transfer
+
+        // loop check
+        add r4 = r0, r10
+        andi r4 = r4, 0xfe // data token for CMD17/18/24
+        beq r0, (r4, r0) -> @loop.func_polling_data_token_for_cmd17_18_24
+
+    // 保存レジスタの復元
+    lw r1 = r3[-4]
+    addi r2 = r2, 4
+
+    // フレームポインタの復元
+    lw r3 = r3[0]
+    addi r2 = r2, 4
+
+    // return
+    jal r0, r1[0]
+  
