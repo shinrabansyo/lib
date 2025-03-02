@@ -39,7 +39,7 @@
         ble r0, (r0, r11) -> @end.func_wait_ms
         // 上位32bit が 0 なら下位32bit の比較を行う
         // 現在時間 - 初期時間 < r22 ならループ継続
-        blt r0, (r6, r22) -> @loop.func_wait_ms
+        blt r0, (r10, r22) -> @loop.func_wait_ms
         // 現在時間 - 初期時間 >= r22 ならループ終了
         beq r0, (r0, r0) -> @end.func_wait_ms
         
